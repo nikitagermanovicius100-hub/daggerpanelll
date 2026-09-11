@@ -1,6 +1,6 @@
 # Daggerheart Character Ribbon
 
-A separate Foundry VTT 14 module for Daggerheart 2.9.2+. Version 0.18.0-draft.6 supports Foundry VTT 14 build 361 and later, previews a wider HUD with centered and left-side layouts plus native chat clearance. This is a draft: keep the stable 0.17.0 archive for rollback. The interface includes complete English and Russian localization, including automatic detection of active Russian Daggerheart translation modules and a manual per-player language override.
+A separate Foundry VTT 14 module for Daggerheart 2.2.6+. Version 0.18.0-draft.7 supports Foundry VTT 14 build 361 and later, previews a wider HUD with centered and left-side layouts plus native chat clearance. This is a draft: keep the stable 0.17.0 archive for rollback. The interface includes complete English and Russian localization, including automatic detection of active Russian Daggerheart translation modules and a manual per-player language override.
 
 Install from Foundry's **Add-on Modules → Install Module → Manifest URL** using `https://raw.githubusercontent.com/nikitagermanovicius100-hub/daggerpanelll/main/daggerheart-quick-panel/module.json`.
 
@@ -20,6 +20,7 @@ Install from Foundry's **Add-on Modules → Install Module → Manifest URL** us
 - Collapsed Equipment, Loadout, Vault, action, feature and gear categories use distinct icon badges with their category name and count below.
 - Equipment follows the sheet: unarmed attack when applicable, primary and secondary weapons, then other equipped usable items in native order. Passive armor is not listed as a weapon; armor slots remain in Core and armor remains manageable in Gear.
 - Features uses the native sheet's feature-context preparation without opening the sheet: ancestry, community, class/subclass, multiclass, transformations, companion and remaining features retain the native titles, ordering and availability rules.
+- Daggerheart 2.2.6 uses its native `sheetLists` categories for Features. Domain Card transfers use the 2.2.6 Effect action for paid recalls and direct native document updates for free moves; Daggerheart 2.9.x continues to use `item.system.toggleVault`.
 
 ## Layout
 

@@ -199,6 +199,14 @@ export class DaggerheartQuickPanelBase {
         context.abilityGroups = (native.featureGroups || []).map((group, index) =>
           this.groupData(`features-${group.anchorItem?.id || group.type}-${index}`, group.title,
             group.values.map(item => this.itemData(item, actor)), true, group.type));
+      } else if (actor?.system.sheetLists) {
+        // Daggerheart 2.2.x exposes the sheet's native categories through the
+        // actor model instead of CharacterSheet#_prepareFeaturesContext.
+        context.abilityGroups = Object.entries(actor.system.sheetLists)
+          .filter(([, group]) => group?.type === "feature" || asArray(group?.values).length)
+          .map(([key, group], index) => this.groupData(`features-${key}-${index}`, group.title,
+            asArray(group.values).map(item => this.itemData(item, actor)), true, group.type || key))
+          .filter((group) => group.items.length);
       }
       const html = await foundry.applications.handlebars.renderTemplate(TEMPLATE, context);
       this.root.innerHTML = html;

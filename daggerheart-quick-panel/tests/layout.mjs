@@ -375,9 +375,37 @@ try {
   await page.locator('[data-tab="abilities"]').click();
   assert.deepEqual(await page.locator('.dqp-inline-group-heading strong').allTextContents(),['Ancestry - Clank','Class - Brawler','Features']);
   assert.deepEqual(await page.locator('.dqp-item-row').evaluateAll(rows=>rows.map(row=>row.dataset.itemId)),['f2','f1']);
+  // Daggerheart 2.2.6 exposes feature categories on actor.system.sheetLists.
+  await page.evaluate(async()=>{
+    delete actor.sheet._prepareFeaturesContext;
+    actor.system.sheetLists={
+      ancestryFeatures:{type:'ancestry',title:'Legacy Ancestry - Clank',values:[actor.items.get('f2')]},
+      classFeatures:{type:'class',title:'Legacy Class - Brawler',values:[actor.items.get('f1')]},
+      features:{type:'feature',title:'Legacy Features',values:[]},
+    };
+    await panel.render();
+  });
+  assert.deepEqual(await page.locator('.dqp-inline-group-heading strong').allTextContents(),['Legacy Ancestry - Clank','Legacy Class - Brawler']);
+  // Paid Vault recalls in 2.2.6 use its Effect action; free storage is a direct item update.
+  await page.evaluate(async()=>{
+    const legacy=actor.items.get('a6');
+    legacy.system.inVault=true;
+    legacy.system.recallCost=2;
+    delete legacy.system.toggleVault;
+    legacy.update=async changes=>{legacy.system.inVault=changes['system.inVault'];calls.push(`legacy-update:${legacy.system.inVault}`);};
+    class LegacyEffectAction {
+      static getSourceConfig(){return {};}
+      constructor(data){this.data=data;}
+      async use(){calls.push(`legacy-recall:${this.data.cost[0].value}`);return true;}
+    }
+    game.system.api.models={actions:{actionsTypes:{effect:LegacyEffectAction}}};
+    calls.length=0;
+    await panel.transferDomainCard(legacy,new Event('click'),false,true);
+  });
+  assert.deepEqual(await page.evaluate(()=>calls),['legacy-recall:2','legacy-update:false']);
   for (const heading of await page.locator('.dqp-inline-group-heading').all()) await heading.click();
-  assert.equal(await page.locator('.dqp-inline-group.is-collapsed .dqp-group-icon i').count(),3);
-  assert.deepEqual(await page.locator('.dqp-inline-group.is-collapsed > .dqp-inline-group-heading strong').allTextContents(),['Ancestry - Clank','Class - Brawler','Features']);
+  assert.equal(await page.locator('.dqp-inline-group.is-collapsed .dqp-group-icon i').count(),2);
+  assert.deepEqual(await page.locator('.dqp-inline-group.is-collapsed > .dqp-inline-group-heading strong').allTextContents(),['Legacy Ancestry - Clank','Legacy Class - Brawler']);
   await page.locator('[data-tab="core"]').click();
   assert.deepEqual(await page.locator('[data-group-key="play-equipment"] .dqp-item-row').evaluateAll(rows=>rows.map(row=>row.dataset.itemId)),['w1','secondary','usable']);
   await page.evaluate(async()=>{

@@ -598,8 +598,8 @@ class DaggerheartQuickPanel extends DaggerheartQuickPanelBase {
         const result = await item.use(event);
         if (result) this.animateElement(row, "is-used", 620);
         const shouldVault = Boolean(result) && item.type === "domainCard" && Number(item.system.recallCost || 0) > 0 && !item.system.inVault;
-        if (shouldVault && typeof item.system.toggleVault === "function") {
-          await item.system.toggleVault(event, true, false);
+        if (shouldVault) {
+          await this.transferDomainCard(item, event, true, false);
           this.patchItemUpdate(item, { system: { inVault: true } });
         }
         return result;
@@ -631,16 +631,47 @@ class DaggerheartQuickPanel extends DaggerheartQuickPanelBase {
     if (!actor.isOwner) return ui.notifications.warn(localize("DQP.Warnings.NoPermission"));
     const item = actor.items.get(itemId);
     if (!item) return ui.notifications.error(localize("DQP.Warnings.MissingItem"));
-    if (item.type !== "domainCard" || typeof item.system.toggleVault !== "function") {
+    if (item.type !== "domainCard") {
       return ui.notifications.error(localize("DQP.Warnings.TransferUnavailable"));
     }
     const toVault = destination ?? !item.system.inVault;
     if (!toVault && !this.loadoutHasRoom(actor, item)) {
       return ui.notifications.warn(localize("DQP.Warnings.LoadoutFull", { max: this.loadoutLimit(actor) }));
     }
+    const hasNativeTransfer = typeof item.system.toggleVault === "function";
+    const LegacyAction = game.system.api?.models?.actions?.actionsTypes?.effect;
+    if (!hasNativeTransfer && !toVault && Number(item.system.recallCost || 0) > 0 && !LegacyAction) {
+      return ui.notifications.error(localize("DQP.Warnings.TransferUnavailable"));
+    }
     const before = Boolean(item.system.inVault);
-    await this.withLock(`vault:${itemId}`, target, () => item.system.toggleVault(event, toVault, !toVault));
+    await this.withLock(`vault:${itemId}`, target, () => this.transferDomainCard(item, event, toVault, !toVault));
     if (Boolean(item.system.inVault) !== before) this.patchItemUpdate(item, { system: { inVault: item.system.inVault } });
+  }
+
+  async transferDomainCard(item, event, toVault, payRecall = true) {
+    if (typeof item.system.toggleVault === "function") {
+      return item.system.toggleVault(event, toVault, payRecall);
+    }
+
+    // Daggerheart 2.2.6 keeps this workflow inside its CharacterSheet. Mirror
+    // that native implementation: storing is free, while recalling a paid card
+    // uses the system Effect action so all resource dialogs and costs stay native.
+    const recallCost = Math.max(0, Number(item.system.recallCost || 0));
+    if (toVault || !payRecall || recallCost === 0) {
+      return item.update({ "system.inVault": Boolean(toVault) });
+    }
+
+    const Action = game.system.api?.models?.actions?.actionsTypes?.effect;
+    if (!Action) return false;
+    const action = new Action({
+      ...Action.getSourceConfig(item.system),
+      type: "effect",
+      chatDisplay: false,
+      cost: [{ key: "stress", value: recallCost }],
+    }, { parent: item.system });
+    const result = await action.use(event);
+    if (result) await item.update({ "system.inVault": false });
+    return result;
   }
 
   setupPlayersPanel() {

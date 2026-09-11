@@ -2,10 +2,10 @@
   "id": "daggerheart-quick-panel",
   "title": "Daggerheart Quick Panel",
   "description": "A Daggerheart-inspired glass HUD with three independent, portrait-anchored character bands.",
-  "version": "0.18.0-draft.6",
+  "version": "0.18.0-draft.7",
   "url": "https://github.com/nikitagermanovicius100-hub/daggerpanelll",
   "manifest": "https://raw.githubusercontent.com/nikitagermanovicius100-hub/daggerpanelll/main/daggerheart-quick-panel/module.json",
-  "download": "https://raw.githubusercontent.com/nikitagermanovicius100-hub/daggerpanelll/v0.18.0-draft.6/daggerheart-quick-panel-0.18.0-draft.6.zip",
+  "download": "https://raw.githubusercontent.com/nikitagermanovicius100-hub/daggerpanelll/v0.18.0-draft.7/daggerheart-quick-panel-0.18.0-draft.7.zip",
   "authors": [
     {
       "name": "EnaOneiro & Codex"
@@ -22,7 +22,7 @@
         "id": "daggerheart",
         "type": "system",
         "compatibility": {
-          "minimum": "2.9.2",
+          "minimum": "2.2.6",
           "verified": "2.9.2"
         }
       }

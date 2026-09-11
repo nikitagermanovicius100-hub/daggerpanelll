@@ -24,6 +24,7 @@ function leafKeys(value, prefix = "") {
 assert(manifest.id === "daggerheart-quick-panel", "Unexpected module id");
 assert(manifest.relationships.systems.some((system) => system.id === "daggerheart"), "Daggerheart relationship is missing");
 assert(Number(manifest.compatibility.minimum.split(".")[1]) <= 361, "Foundry 14 build 361 must be allowed by the manifest");
+assert(manifest.relationships.systems.find((system) => system.id === "daggerheart").compatibility.minimum === "2.2.6", "Daggerheart 2.2.6 must be allowed by the manifest");
 
 for (const relative of [...manifest.esmodules, ...manifest.styles, ...manifest.languages.map((language) => language.path)]) {
   assert(fs.existsSync(path.join(root, relative)), `Missing manifest file: ${relative}`);
@@ -81,6 +82,7 @@ assert(sources.includes('class="dqp-group-icon"'), "Collapsed category icons are
 assert(!sources.includes('data-action="adjust-resource"'), "Armor must use direct pips without plus/minus controls");
 assert(sources.includes("actor.system.updateArmorValue"), "Armor pips must use Daggerheart's native armor update flow");
 assert(sources.includes('data-action="toggle-vault"') && sources.includes("item.system.toggleVault"), "Native Vault transfer is missing");
+assert(sources.includes("actor?.system.sheetLists") && sources.includes("transferDomainCard") && sources.includes("Action.getSourceConfig(item.system)"), "Daggerheart 2.2.6 compatibility paths are missing");
 assert(sources.includes("item.system.recallCost") && sources.includes("Boolean(result)"), "Paid cards must auto-vault only after successful use");
 assert(sources.includes("installStressOverflowCostRule") && sources.includes("CostField.hasCost = hasCostWithStressOverflow"), "Stress overflow cost rule is missing");
 assert(sources.includes("countLabel"), "Loadout current/maximum capacity is missing");
