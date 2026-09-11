@@ -701,6 +701,42 @@ class DaggerheartQuickPanel extends DaggerheartQuickPanelBase {
 
 }
 
+let quickPanel = null;
+
+function registerHudSceneControl(controls) {
+  if (game.system.id !== "daggerheart" || !game.user.isGM) return;
+
+  const groups = Array.isArray(controls) ? controls : Object.values(controls || {});
+  const group = groups.find((control) => ["token", "tokens"].includes(control?.name));
+  if (!group) return;
+
+  const activate = () => (quickPanel ?? game.modules.get(MODULE_ID)?.api?.panel)?.toggleHud(null);
+  const tool = {
+    name: "dqp-toggle-hud",
+    title: localize("DQP.Hud.GMControl"),
+    icon: "fa-solid fa-eye",
+    button: true,
+    visible: true,
+    onChange: activate,
+  };
+
+  // Foundry 14 uses a keyed tools record. Retain the array branch for worlds
+  // whose UI compatibility layer still exposes the earlier collection shape.
+  if (Array.isArray(group.tools)) {
+    if (!group.tools.some((candidate) => candidate?.name === tool.name)) group.tools.push(tool);
+    return;
+  }
+
+  if (!group.tools || typeof group.tools !== "object") group.tools = {};
+  if (group.tools[tool.name] || Object.values(group.tools).some((candidate) => candidate?.name === tool.name)) return;
+  const orders = Object.values(group.tools).map((candidate) => Number(candidate?.order)).filter(Number.isFinite);
+  group.tools[tool.name] = { ...tool, order: (orders.length ? Math.max(...orders) : -1) + 1 };
+}
+
+// Register before ready: build 361 can prepare Scene Controls before the HUD
+// itself has mounted. The click callback resolves the panel lazily.
+Hooks.on("getSceneControlButtons", registerHudSceneControl);
+
 Hooks.once("init", () => {
   game.settings.register(MODULE_ID, "hudEnabled", {
     scope: "client", config: false, type: Boolean, default: true,
@@ -753,33 +789,11 @@ Hooks.once("ready", async () => {
   if (game.system.id !== "daggerheart") return;
   installStressOverflowCostRule();
   const panel = new DaggerheartQuickPanel();
+  quickPanel = panel;
   game.modules.get(MODULE_ID).api = { panel, render: () => panel.render() };
   await panel.applyLanguage(false);
   await panel.mount();
   panel.setupPlayersPanel();
-
-  // Keep a GM-only fallback control in Foundry's scene tools. This remains
-  // available even when the floating eye is hidden or covered by another UI.
-  Hooks.on("getSceneControlButtons", (controls) => {
-    if (!game.user.isGM) return;
-    const groups = Array.isArray(controls) ? controls : Object.values(controls || {});
-    let group = groups.find((control) => ["token", "tokens"].includes(control.name));
-    if (!group) {
-      group = { name: "dqp-hud", title: localize("DQP.Hud.GMControlTitle"), icon: "fa-solid fa-eye", tools: [] };
-      if (Array.isArray(controls)) controls.push(group);
-      else controls.dqpHud = group;
-    }
-    group.tools ||= [];
-    if (group.tools.some((tool) => tool.name === "dqp-toggle-hud")) return;
-    group.tools.push({
-      name: "dqp-toggle-hud",
-      title: localize("DQP.Hud.GMControl"),
-      icon: "fa-solid fa-eye",
-      button: true,
-      onChange: () => panel.enableHud(),
-    });
-  });
-
   const relevantActor = (document) => document?.type === "character" || document?.parent?.type === "character";
   Hooks.on("updateActor", (actor, changes) => {
     if (actor.type === "character" && !panel.patchActorUpdate(actor, changes)) panel.scheduleRender();

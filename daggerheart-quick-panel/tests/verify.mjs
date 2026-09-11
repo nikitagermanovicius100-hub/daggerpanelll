@@ -23,6 +23,7 @@ function leafKeys(value, prefix = "") {
 
 assert(manifest.id === "daggerheart-quick-panel", "Unexpected module id");
 assert(manifest.relationships.systems.some((system) => system.id === "daggerheart"), "Daggerheart relationship is missing");
+assert(Number(manifest.compatibility.minimum.split(".")[1]) <= 361, "Foundry 14 build 361 must be allowed by the manifest");
 
 for (const relative of [...manifest.esmodules, ...manifest.styles, ...manifest.languages.map((language) => language.path)]) {
   assert(fs.existsSync(path.join(root, relative)), `Missing manifest file: ${relative}`);
@@ -59,6 +60,8 @@ assert(sources.includes('class="dqp-portrait-frame" data-action="open-sheet"'), 
 assert(sources.includes('data-action="select-actor"'), "Portrait actor picker is missing");
 assert(sources.includes('data-action="toggle-hud"') && sources.includes("chooseActorForHud"), "Persistent HUD toggle or actor prompt is missing");
 assert(sources.includes("getSceneControlButtons") && sources.includes("dqp-toggle-hud") && sources.includes("game.user.isGM"), "GM HUD fallback control is missing");
+assert(sources.includes("group.tools[tool.name]") && sources.includes("Array.isArray(group.tools)"), "Foundry 14 keyed Scene Controls compatibility is missing");
+assert(sources.indexOf('Hooks.on("getSceneControlButtons"') < sources.indexOf('Hooks.once("ready"'), "Scene Controls hook must be registered before ready");
 assert(sources.includes('data-action="toggle-group"'), "Collapsible item groups are missing");
 assert(sources.includes("playGroups"), "Play tab item groups are missing");
 assert(!sources.includes('type="search"'), "Gear search must not be present");

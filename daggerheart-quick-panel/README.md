@@ -1,6 +1,6 @@
 # Daggerheart Character Ribbon
 
-A separate Foundry VTT 14 module for Daggerheart 2.9.2+. Version 0.18.0-draft.5 previews a wider HUD with centered and left-side layouts plus native chat clearance. This is a draft: keep the stable 0.17.0 archive for rollback. The interface includes complete English and Russian localization, including automatic detection of active Russian Daggerheart translation modules and a manual per-player language override.
+A separate Foundry VTT 14 module for Daggerheart 2.9.2+. Version 0.18.0-draft.6 supports Foundry VTT 14 build 361 and later, previews a wider HUD with centered and left-side layouts plus native chat clearance. This is a draft: keep the stable 0.17.0 archive for rollback. The interface includes complete English and Russian localization, including automatic detection of active Russian Daggerheart translation modules and a manual per-player language override.
 
 Install from Foundry's **Add-on Modules → Install Module → Manifest URL** using `https://raw.githubusercontent.com/nikitagermanovicius100-hub/daggerpanelll/main/daggerheart-quick-panel/module.json`.
 
@@ -38,6 +38,7 @@ At the default 100% scale, the bands measure up to 1240 × 208 px, plus the port
 - Experiences is a separate read-only HUD list of entries already created on the character sheet. Hover for the description; click a card for its full name, bonus and description with Send to chat / Close choices. Only explicit confirmation creates a chat card with the original actor as speaker. Closing or cancelling does not post anything.
 - Hover or focus an item to read its full description in a styled scrollable card. Move into the card to read/scroll it; Escape dismisses it. Descriptions are converted to inert plain text, preserving paragraphs. Tabs, actor switches and rerenders remove stale previews.
 - The macro hotbar stays hidden while the HUD is active.
+- The GM HUD toggle supports Foundry 14 build 361's keyed Scene Controls and is registered before the controls are prepared, while retaining the earlier array-shaped compatibility path.
 
 ## Preserved integrations
 
