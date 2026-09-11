@@ -1,0 +1,183 @@
+{
+  "DQP": {
+    "Title": "Character Ribbon",
+    "Open": "Show character ribbon",
+    "Close": "Hide character ribbon",
+    "Hud": {
+      "Show": "Show HUD",
+      "Hide": "Hide HUD",
+      "Enable": "Show HUD",
+      "ChooseTitle": "Choose a character",
+      "ChooseHint": "Which character do you want to use in the HUD?",
+      "GMControlTitle": "Daggerheart HUD",
+      "GMControl": "Show Daggerheart HUD"
+    },
+    "Actor": {
+      "NoneTitle": "No character available",
+      "NoneHintPlayer": "Assign a character to your user or grant Owner permission to a character.",
+      "NoneHintGM": "Create a Daggerheart character to use the quick panel.",
+      "OpenSheet": "Open full character sheet",
+      "LevelUp": "Open character advancement",
+      "Select": "Choose your character",
+      "Class": "Class",
+      "Domains": "Domains"
+    },
+    "Columns": {
+      "Restore": "Show or hide HUD layers",
+      "Character": "Character",
+      "Traits": "Traits & Rest",
+      "Workspace": "Play Menu",
+      "Vitals": "Vitals",
+      "OpenCharacter": "Open character column",
+      "CloseCharacter": "Close character column",
+      "ToggleCharacter": "Show or hide character state",
+      "OpenTraits": "Open traits and rest column",
+      "CloseTraits": "Close traits and rest column",
+      "ToggleTraits": "Show or hide traits and rest",
+      "OpenWorkspace": "Open play menu column",
+      "CloseWorkspace": "Close play menu column",
+      "ToggleWorkspace": "Show or hide toolkit"
+    },
+    "Tabs": {
+      "Core": "Play",
+      "Actions": "Actions",
+      "Abilities": "Features",
+      "Gear": "Gear"
+    },
+    "Resources": {
+      "HitPoints": "Hit Points",
+      "Stress": "Stress",
+      "Hope": "Hope",
+      "Armor": "Armor Slots",
+      "Set": "Set {resource} to {value}"
+    },
+    "Cost": {
+      "Action": "Cost: {cost}",
+      "Recall": "Recall cost: {cost}",
+      "Free": "Free",
+      "FreeShort": "FREE",
+      "StressOverflowPartial": "{stress} Stress + {hp} Hit Point",
+      "StressOverflowFull": "{hp} Hit Point",
+      "Quantity": "item",
+      "Charges": "charge",
+      "Fear": "Fear"
+    },
+    "Stats": {
+      "Evasion": "Evasion",
+      "Armor": "Armor",
+      "Proficiency": "Proficiency",
+      "Thresholds": "Damage thresholds",
+      "Minor": "Minor",
+      "Major": "Major",
+      "Severe": "Severe"
+    },
+    "Traits": {
+      "Title": "Traits",
+      "Roll": "Roll {trait}",
+      "Agility": "Agility",
+      "Strength": "Strength",
+      "Finesse": "Finesse",
+      "Instinct": "Instinct",
+      "Presence": "Presence",
+      "Knowledge": "Knowledge"
+    },
+    "Actions": {
+      "NoDescription": "No description recorded.",
+      "Ready": "Ready actions",
+      "Weapons": "Weapons",
+      "Consumables": "Consumables",
+      "Features": "Features",
+      "Use": "Use {item}",
+      "Details": "Open {item}",
+      "NoActions": "No ready actions. Equip a weapon, load a domain card, or add an actionable feature.",
+      "Busy": "Resolving…"
+    },
+    "Experiences": {
+      "ShareQuestion": "Send this experience to chat?",
+      "Share": "Send to chat",
+      "Close": "Close",
+      "Title": "Experiences",
+      "Edit": "Write or edit experiences",
+      "Add": "Add an experience",
+      "Unnamed": "Unnamed experience",
+      "Unavailable": "The Daggerheart experience editor is unavailable."
+    },
+    "Play": {
+      "Equipment": "Equipped",
+      "Loadout": "Loadout",
+      "QuickActions": "Quick actions"
+    },
+    "Cards": {
+      "NoFeatures": "No features yet.",
+      "Empty": "Empty",
+      "Loadout": "Loadout",
+      "Vault": "Vault",
+      "ToLoadout": "Recall to Loadout",
+      "ToVault": "Send to Vault",
+      "Feature": "Features",
+      "InVault": "Vault",
+      "NoCards": "No domain cards or features yet."
+    },
+    "Gear": {
+      "Equip": "Equip item",
+      "Unequip": "Unequip item",
+      "EquipUnavailable": "The native Daggerheart equip action is unavailable.",
+      "Weapons": "Weapons",
+      "Armor": "Armor",
+      "Consumables": "Consumables",
+      "Loot": "Loot",
+      "Equipped": "Equipped",
+      "Quantity": "Qty. {value}"
+    },
+    "Rest": {
+      "Short": "Short Rest",
+      "Long": "Long Rest",
+      "ShortHint": "Open the official Short Rest moves",
+      "LongHint": "Open the official Long Rest moves"
+    },
+    "Warnings": {
+      "NoPermission": "You do not have permission to change this character.",
+      "NoItemAction": "This item has no action. Its sheet was opened instead.",
+      "MaxLevel": "This character is already at the maximum level.",
+      "MissingItem": "This item no longer exists.",
+      "CardInVault": "This card is in the Vault. Recall it to your Loadout before using it.",
+      "CardSuppressed": "This card cannot be used because its domain requirements are not met.",
+      "InsufficientResource": "Not enough {resource}: {needed} required, {available} available.",
+      "LoadoutFull": "Loadout is full ({max} cards). Send a card to the Vault first.",
+      "TransferUnavailable": "This card cannot be moved between Loadout and Vault.",
+      "Busy": "That action is already being resolved.",
+      "ActionFailed": "The action could not be completed: {reason}",
+      "Unsupported": "Daggerheart Quick Panel only works in a Daggerheart world."
+    },
+    "Players": {
+      "Show": "Show connected players",
+      "Hide": "Hide connected players"
+    },
+    "Scale": {
+      "Title": "HUD scale",
+      "Hint": "Personal HUD size. 100% is the original size; other players are unaffected.",
+      "Smaller": "Make HUD smaller",
+      "Larger": "Make HUD larger",
+      "Reset": "Reset to original size (100%)"
+    },
+    "Placement": {
+      "Title": "HUD placement",
+      "Hint": "Choose a centered HUD or a side HUD for this client. Other players are unaffected.",
+      "Center": "Centered HUD",
+      "Side": "Side HUD"
+    },
+    "Theme": {
+      "Title": "HUD theme",
+      "Hint": "Choose a personal visual theme. Other players are unaffected.",
+      "Daggerheart": "Daggerheart",
+      "Minimal": "Minimal Duo",
+      "Arcane": "Dark Arcane",
+      "Sacred": "Sacred Light",
+      "Monochrome": "Monochrome"
+    },
+    "Group": {
+      "Expand": "Expand {group}",
+      "Collapse": "Collapse {group}"
+    }
+  }
+}

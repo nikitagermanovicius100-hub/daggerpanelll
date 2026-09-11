@@ -1,0 +1,19 @@
+<article class="dqp-item-row dqp-item-row--{{type}} {{#if equipped}}is-equipped{{/if}}" data-item-id="{{id}}" data-item-uuid="{{uuid}}" data-vault-state="{{#if inVault}}vault{{else}}loadout{{/if}}" {{#if vaultable}}draggable="true"{{/if}}>
+  <button type="button" class="dqp-item-use" data-action="{{primaryAction}}" data-item-id="{{id}}" data-preview-item="{{id}}" aria-label="{{primaryLabel}}">
+    <span class="dqp-item-image"><img src="{{img}}" alt="" /></span>
+    <span class="dqp-item-copy">
+      <strong>{{name}}</strong>
+      <span>{{meta}}</span>
+    </span>
+    {{#if resource}}<span class="dqp-item-resource">{{resource}}</span>{{/if}}
+    {{#if costShort}}<span class="dqp-item-cost" data-tooltip="{{costPreview}}">{{costShort}}</span>{{/if}}
+    <i class="{{primaryIcon}} dqp-item-play" inert></i>
+  </button>
+  <div class="dqp-item-controls">
+    {{#if vaultable}}<button type="button" class="dqp-item-vault" data-action="toggle-vault" data-item-id="{{id}}" aria-label="{{vaultLabel}}" data-tooltip="{{vaultTooltip}}"><i class="{{vaultIcon}}" inert></i></button>{{/if}}
+    {{#if equippable}}<button type="button" class="dqp-item-equip {{#if equipped}}is-active{{/if}}" data-action="toggle-equip" data-item-id="{{id}}" aria-pressed="{{equipped}}" aria-label="{{equipLabel}}" data-tooltip="{{equipLabel}}"><i class="fa-solid fa-shirt" inert></i></button>{{/if}}
+  <button type="button" class="dqp-item-open" data-action="open-item" data-item-id="{{id}}" aria-label="{{detailsLabel}}" data-tooltip="{{detailsLabel}}">
+    <i class="fa-solid fa-ellipsis-vertical" inert></i>
+  </button>
+  </div>
+</article>
