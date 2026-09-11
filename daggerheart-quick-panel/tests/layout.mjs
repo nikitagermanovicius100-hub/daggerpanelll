@@ -10,6 +10,11 @@ const foundry = process.env.FOUNDRY_APP || 'C:/Program Files/Foundry Virtual Tab
 const runtime = process.env.PLAYWRIGHT_PATH || `${process.env.USERPROFILE}/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright`;
 const { chromium } = require(runtime);
 const read = name => fs.readFileSync(path.join(root, name), 'utf8');
+const runtimeSource = [
+  read('scripts/helpers.js'),
+  read('scripts/panel-base.js'),
+  read('scripts/main.js'),
+].map(source => source.replace(/^import .*?;\r?\n/gm, '').replace(/^export /gm, '')).join('\n');
 const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe', headless: true });
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
 const errors = [];
@@ -24,9 +29,10 @@ try {
   const font = fs.readFileSync(path.join(foundry, 'public/fonts/fontawesome/webfonts/fa-solid-900.woff2')).toString('base64');
   await page.addStyleTag({ content: fa + `\n@font-face {font-family:'Font Awesome 7 Pro';font-style:normal;font-weight:900;src:url(data:font/woff2;base64,${font}) format('woff2');}` });
   await page.addStyleTag({ content: read('styles/panel.css') });
-  await page.evaluate(({ main, template, partial, en, portrait }) => {
+  await page.evaluate(({ source, template, partial, en, ru, portrait }) => {
     const get = (object, key) => key.split('.').reduce((value, part) => value?.[part], object);
-    const settings = new Map(['hudEnabled', 'characterOpen', 'traitsOpen', 'workspaceOpen'].map(key => [key, true]));
+    window.languagePacks={en,ru};
+    const settings = new Map([...['hudEnabled', 'characterOpen', 'traitsOpen', 'workspaceOpen'].map(key => [key, true]), ['hudPlacement', 'center'], ['hudLanguage', 'auto']]);
     window.calls = [];
     const item = { id:'a1', name:'Deft Maneuvers', type:'domainCard', img:portrait, system:{ actionsList:[{cost:[{key:'stress',value:2,enabled:true}]}], domainLabel:'Bone', level:1, description:'A ready ability.', async toggleVault(_event,toVault,isRecall){calls.push(`vault:${toVault}:${isRecall}`);this.inVault=toVault;} }, use:async () => calls.push('item'), sheet:{render:() => calls.push('item-sheet')} };
     const items = Array.from({length:6}, (_, index) => ({...item, id:`a${index+1}`, name:index ? `Ability ${index+1}` : item.name, system:{...item.system,inVault:index>=3}}));
@@ -64,8 +70,8 @@ try {
     actor.system.resources.hitPoints.isReversed = true;
     window.game = {
       system:{id:'daggerheart',api:{applications:{dialogs:{Downtime},sheetConfigs:{CharacterSettings}},fields:{ActionFields:{CostField}}}},
-      user:{isGM:false,character:actor}, actors:[actor],
-      i18n:{lang:'en',localize:key => get(en,key) || key,format:(key,data) => (get(en,key)||key).replace(/\{(\w+)\}/g,(_,k)=>data[k])},
+      user:{isGM:false,character:actor}, actors:[actor], modules:new Map(),
+      i18n:{lang:'en',translations:structuredClone(en),localize:key => get(game.i18n.translations,key) || key,format:(key,data) => (get(game.i18n.translations,key)||key).replace(/\{(\w+)\}/g,(_,k)=>data[k])},
       settings:{get:(_,key)=>settings.get(key),set:async (_,key,value)=>settings.set(key,value)}
     };
     window.Hooks={once:()=>{},on:()=>{}};
@@ -77,8 +83,9 @@ try {
     window.actorPromptSelection=null;
     window.actorPromptCount=0;
     window.CONFIG={ChatMessage:{documentClass:{getSpeaker:({actor})=>({actor:actor.id,alias:actor.name}),create:async data=>chatMessages.push(data)}}};
-    window.foundry={utils:{getProperty:get},applications:{api:{DialogV2:{confirm:async options=>{window.lastConfirmation=options;return window.confirmAnswer;},prompt:async options=>{window.lastActorPrompt=options;window.actorPromptCount++;return window.actorPromptSelection;}}},handlebars:{renderTemplate:async(_,context)=>Handlebars.compile(template)(context)}}};
-    (0,eval)(main+'\nwindow.TestPanel = DaggerheartQuickPanel; window.installStressOverflowCostRule = installStressOverflowCostRule;');
+    window.foundry={utils:{getProperty:get,deepClone:value=>structuredClone(value)},applications:{api:{DialogV2:{confirm:async options=>{window.lastConfirmation=options;return window.confirmAnswer;},prompt:async options=>{window.lastActorPrompt=options;window.actorPromptCount++;return window.actorPromptSelection;}}},handlebars:{renderTemplate:async(_,context)=>Handlebars.compile(template)(context)}}};
+    window.fetch=async url=>({ok:true,status:200,json:async()=>structuredClone(String(url).includes('/ru.json')?ru:en)});
+    (0,eval)(source+'\nwindow.TestPanel = DaggerheartQuickPanel; window.installStressOverflowCostRule = installStressOverflowCostRule;');
     const costContext = {actor};
     actor.system.resources.stress.value = 5;
     if (CostField.hasCost.call(costContext,[{key:'stress',value:2,total:2,enabled:true}])) throw new Error('Native mock must reject 5/6 Stress + 2');
@@ -93,7 +100,7 @@ try {
     panel.setupPlayersPanel();
     window.testSettings=settings;
     return panel.render();
-  }, {main:read('scripts/main.js'),template:read('templates/panel.hbs'),partial:read('templates/partials/item-row.hbs'),en:JSON.parse(read('lang/en.json')),portrait:'data:image/svg+xml;base64,'+fs.readFileSync(path.join(foundry,'public/icons/svg/mystery-man.svg')).toString('base64')});
+  }, {source:runtimeSource,template:read('templates/panel.hbs'),partial:read('templates/partials/item-row.hbs'),en:JSON.parse(read('lang/en.json')),ru:JSON.parse(read('lang/ru.json')),portrait:'data:image/svg+xml;base64,'+fs.readFileSync(path.join(foundry,'public/icons/svg/mystery-man.svg')).toString('base64')});
 
   assert.equal(await page.locator('.dqp-hud-toggle').isVisible(),true);
   assert.equal(await page.locator('.dqp-shell').count(),1);
@@ -138,6 +145,18 @@ try {
   await page.locator('[data-action="toggle-theme"]').click();
   await page.locator('.dqp-theme-choice[data-theme="daggerheart"]').click();
   assert.equal(await page.evaluate(()=>testSettings.get('hudTheme')),'daggerheart');
+  // Placement is client-local and switches between screen center and a left-side dock without rebuilding.
+  await page.evaluate(()=>{window.placementHud=document.querySelector('.dqp-columns');});
+  await page.locator('[data-action="toggle-scale"]').click();
+  await page.locator('[data-placement="side"]').click();
+  assert.equal(await page.locator('#dqp-root').getAttribute('data-placement'),'side');
+  assert(Math.abs(await page.locator('.dqp-shell').evaluate(el=>el.getBoundingClientRect().left)-18)<2,'Side HUD must anchor to the left safe margin');
+  assert(await page.evaluate(()=>placementHud===document.querySelector('.dqp-columns')),'Placement switch must preserve the HUD DOM');
+  await page.screenshot({path:path.join(output,'placement-side.png')});
+  await page.locator('[data-placement="center"]').click();
+  assert.equal(await page.locator('#dqp-root').getAttribute('data-placement'),'center');
+  assert(Math.abs(await page.locator('.dqp-shell').evaluate(el=>(el.getBoundingClientRect().left+el.getBoundingClientRect().right)/2)-960)<2,'Centered HUD must return to screen center');
+  await page.locator('[data-action="toggle-scale"]').click();
   // Resource-only updates patch the existing HUD, animate only changed pips, and refresh price previews.
   await page.evaluate(()=>{
     window.originalHud=document.querySelector('.dqp-columns');
@@ -244,7 +263,7 @@ try {
       assert.deepEqual(result.bars,[64,38,98].map((h,i)=>mask&(1<<i)?0:h));
       if(!mask) {
         assert.equal(result.stack.height,208);
-        if(width===1920) assert(result.stack.width>=900 && result.stack.width<=1050 && result.stack.width<width*.55);
+        if(width===1920) assert(result.stack.width>=1239 && result.stack.width<=1241 && result.stack.width<width*.7);
         await page.locator('.dqp-shell').screenshot({path:path.join(output,`hud-${width}.png`)});
       }
     }
@@ -396,6 +415,60 @@ try {
   assert.equal(await page.locator('[data-action="select-actor"]').inputValue(),'second');
   await page.evaluate(async()=>{await panel.toggleColumn('traits'); await panel.render();});
   assert.equal(await page.locator('.dqp-column--traits').evaluate(el=>el.classList.contains('is-collapsed')),true);
+  // Center the entire dock, lift native quick chat above it and only reserve
+  // the actual sidebar controls on the right.
+  await page.evaluate(async()=>{
+    for (const key of ['character','traits','workspace']) await game.settings.set('',`${key}Open`,true);
+    await panel.render();
+    const uiRight=document.createElement('aside');
+    uiRight.id='ui-right';
+    uiRight.style.cssText='position:fixed;inset:0 0 0 auto;width:408px;height:100vh;transform:none;display:block;pointer-events:none;';
+    uiRight.innerHTML='<div id="ui-right-column-1" style="position:absolute;inset:0 64px 0 auto;width:328px;height:100vh;padding:16px 0 14px;display:flex;flex-direction:column;pointer-events:none"><div id="chat-notifications" style="flex:1;order:99;display:grid;grid-template-rows:1fr 80px"><div class="overflow"></div><textarea id="chat-message" class="chat-input" aria-label="Test native chat" style="width:328px;height:80px;pointer-events:auto"></textarea></div></div><nav id="sidebar" style="position:absolute;inset:0 0 0 auto;width:48px;height:100vh;background:#171421;pointer-events:auto"></nav>';
+    document.body.append(uiRight);
+    panel.observeLayout();
+  });
+  for (const width of [1920,1366,1024]) {
+    await page.setViewportSize({width,height:900});
+    for (const scale of [75,100,125]) {
+      await page.evaluate(async scale=>{await game.settings.set('','hudScale',scale);panel.applyScale();},scale);
+      const geometry=await page.evaluate(()=>({
+        hud:document.querySelector('.dqp-shell').getBoundingClientRect().toJSON(),
+        chat:document.querySelector('#chat-message').getBoundingClientRect().toJSON(),
+        sidebar:document.querySelector('#sidebar').getBoundingClientRect().toJSON(),
+      }));
+      assert(geometry.hud.left>=17,`Dock left edge outside safe area at ${width}/${scale}`);
+      assert(geometry.hud.right<=geometry.sidebar.left-17,`Dock overlaps sidebar at ${width}/${scale}`);
+      assert(geometry.chat.bottom<=geometry.hud.top-12,`Quick chat is not above the HUD at ${width}/${scale}`);
+      assert(Math.abs((geometry.hud.left+geometry.hud.right)/2-width/2)<2,`Dock is not screen-centered at ${width}/${scale}`);
+      assert.equal(await page.evaluate(()=>testSettings.get('hudScale')),scale,'Auto-fit must preserve requested scale');
+      await page.locator('[aria-label="Test native chat"]').fill(`Chat works at ${width}/${scale}`);
+      assert.equal(await page.locator('[aria-label="Test native chat"]').inputValue(),`Chat works at ${width}/${scale}`);
+    }
+    await page.evaluate(async()=>{await game.settings.set('','hudScale',100);panel.applyScale();});
+    if (width===1920) assert(await page.locator('.dqp-columns').evaluate(el=>el.getBoundingClientRect().width)>=1239,'HUD does not use the expanded 1240px band width');
+    await page.screenshot({path:path.join(output,`centered-chat-${width}.png`)});
+  }
+  // Resizing/collapsing the native sidebar changes fit without moving the center or rebuilding the HUD.
+  await page.evaluate(()=>{window.centeredHud=document.querySelector('.dqp-columns');document.querySelector('#sidebar').style.width='360px';});
+  await page.waitForFunction(()=>Math.abs((document.querySelector('.dqp-shell').getBoundingClientRect().left+document.querySelector('.dqp-shell').getBoundingClientRect().right)/2-innerWidth/2)<2);
+  assert(await page.evaluate(()=>centeredHud===document.querySelector('.dqp-columns')));
+  await page.evaluate(()=>{document.querySelector('#ui-right').remove();panel.observeLayout();});
+  // An active Russian Daggerheart translation module localizes this HUD even when Foundry itself stays English.
+  await page.setViewportSize({width:1366,height:900});
+  await page.evaluate(async()=>{
+    game.i18n.lang='en';
+    game.modules.set('daggerheart-ru',{id:'daggerheart-ru',title:'Русский перевод Daggerheart',active:true,relationships:{systems:[{id:'daggerheart'}]}});
+    await panel.applyLanguage(false);
+    await panel.render();
+  });
+  assert.equal(await page.evaluate(()=>game.i18n.lang),'en');
+  assert.equal(await page.evaluate(()=>panel.activeLanguage),'ru');
+  assert.equal((await page.locator('[data-tab="core"]').textContent()).trim(),'Игра');
+  assert.equal((await page.locator('[data-tab="experiences"]').textContent()).trim(),'Опыт');
+  assert.equal(await page.locator('[data-action="toggle-scale"]').getAttribute('aria-label'),'Масштаб HUD');
+  const russianOverflow=await page.evaluate(()=>Array.from(document.querySelectorAll('.dqp-character-body,.dqp-character-identity,.dqp-traits-body,.dqp-trait,.dqp-trait-name,.dqp-defense,.dqp-resource-label,.dqp-tabs')).filter(el=>getComputedStyle(el).visibility!=='hidden'&&el.getClientRects().length&&(el.scrollWidth>el.clientWidth+1||el.scrollHeight>el.clientHeight+1)).map(el=>el.className));
+  assert.deepEqual(russianOverflow,[],'Russian HUD labels must fit the tested layout');
+  await page.screenshot({path:path.join(output,'localization-ru.png')});
   assert.deepEqual(errors,[]);
-  console.log('PASS: five persistent HUD themes; 24 viewport/hidden-layer combinations; rolls, tabs, native item/rest calls, resource and armor bindings, permissions, hover cards, existing experiences, actor selector and persisted layer states.');
+  console.log('PASS: five persistent HUD themes; centered/side placement; complete Russian render; 24 viewport/hidden-layer combinations; rolls, tabs, native item/rest calls, resource and armor bindings, permissions, hover cards, existing experiences, actor selector and persisted layer states.');
 } finally { await browser.close(); }

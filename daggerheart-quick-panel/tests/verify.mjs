@@ -8,6 +8,7 @@ const json = (relative) => JSON.parse(read(relative));
 
 const manifest = json("module.json");
 const en = json("lang/en.json");
+const ru = json("lang/ru.json");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -28,9 +29,19 @@ for (const relative of [...manifest.esmodules, ...manifest.styles, ...manifest.l
 }
 
 const enKeys = leafKeys(en).sort();
-assert(manifest.languages.length === 1 && manifest.languages[0].lang === "en", "The preview build must be English-only");
+const ruKeys = leafKeys(ru).sort();
+assert(manifest.languages.some((language) => language.lang === "en") && manifest.languages.some((language) => language.lang === "ru"), "English and Russian language packs must both be registered");
+assert(JSON.stringify(ruKeys) === JSON.stringify(enKeys), "Russian localization must cover every English HUD key");
+
+for (const key of enKeys) {
+  const get = (value) => key.split(".").reduce((current, part) => current?.[part], value);
+  const placeholders = (value) => [...String(value).matchAll(/\{\w+\}/g)].map((match) => match[0]).sort().join(",");
+  assert(placeholders(get(en)) === placeholders(get(ru)), `Russian placeholders differ for ${key}`);
+}
 
 const sources = [
+  read("scripts/helpers.js"),
+  read("scripts/panel-base.js"),
   read("scripts/main.js"),
   read("templates/panel.hbs"),
   read("templates/partials/item-row.hbs"),
@@ -75,6 +86,8 @@ assert(sources.includes("itemCostPreview") && sources.includes('class="dqp-item-
 assert(sources.includes("patchActorUpdate") && sources.includes("patchItemUpdate"), "Incremental HUD update path is missing");
 assert(read("styles/panel.css").includes("dqp-item-used") && read("styles/panel.css").includes("dqp-pip-mark"), "Action feedback animations are missing");
 assert(sources.includes("HUD_THEMES") && sources.includes('data-action="set-theme"') && sources.includes("hudTheme"), "Personal HUD theme selector is missing");
+assert(sources.includes("HUD_PLACEMENTS") && sources.includes('data-action="set-placement"') && sources.includes("hudPlacement"), "Personal centered/side HUD selector is missing");
+assert(sources.includes("HUD_LANGUAGES") && sources.includes("hasRussianDaggerheartTranslation") && sources.includes("applyLanguage") && sources.includes("hudLanguage"), "HUD translation-module detection and personal language override are missing");
 for (const theme of ["minimal", "arcane", "sacred", "monochrome"]) {
   assert(read("styles/panel.css").includes(`data-theme="${theme}"`), `Theme stylesheet is missing: ${theme}`);
 }
@@ -82,10 +95,11 @@ for (const key of ["MissingItem", "CardInVault", "CardSuppressed", "Insufficient
   assert(en.DQP.Warnings[key], `Clear error message is missing: ${key}`);
 }
 assert(sources.includes("dqp-players-toggle") && sources.includes("playersCollapsed"), "Collapsible connected-player panel is missing");
-assert(!read("styles/panel.css").includes("#chat-notifications"), "Foundry chat placement must not be overridden");
+assert(read("styles/panel.css").includes("#ui-right #ui-right-column-1") && sources.includes("--dqp-chat-clearance"), "Native quick chat must clear the HUD vertically");
+assert(read("styles/panel.css").includes("--dqp-hud-max: 1240px"), "Expanded HUD width is missing");
 assert(sources.includes('data-column-panel="character"') && sources.includes('data-column-panel="traits"') && sources.includes('data-column-panel="workspace"'), "Fixed independent layer anchors are missing");
 assert(!sources.includes("panelStage"), "Sequential stage state must not be used");
 assert(read("styles/panel.css").includes("object-fit: contain"), "The full portrait image must remain visible");
 assert(!sources.includes("dqp-detail-panel"), "Detached detail window must not be present");
 
-console.log(`Verified ${manifest.title} ${manifest.version}: ${enKeys.length} English strings, native Daggerheart actions, no system patching.`);
+console.log(`Verified ${manifest.title} ${manifest.version}: ${enKeys.length} English/Russian strings, native Daggerheart actions, no system patching.`);

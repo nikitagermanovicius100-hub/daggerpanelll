@@ -166,6 +166,13 @@
       "Center": "Centered HUD",
       "Side": "Side HUD"
     },
+    "Language": {
+      "Title": "HUD language",
+      "Hint": "Automatic follows Foundry or an active Russian Daggerheart translation module. This choice only affects your HUD.",
+      "Auto": "Automatic",
+      "English": "English",
+      "Russian": "Russian"
+    },
     "Theme": {
       "Title": "HUD theme",
       "Hint": "Choose a personal visual theme. Other players are unaffected.",

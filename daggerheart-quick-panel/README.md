@@ -1,6 +1,8 @@
 # Daggerheart Character Ribbon
 
-A separate Foundry VTT 14 module for Daggerheart 2.9.2+. Version 0.18.0-draft.4 previews a wider HUD with centered and left-side layouts plus native chat clearance. This is a draft: keep the stable 0.17.0 archive for rollback. The interface includes complete English and Russian localization.
+A separate Foundry VTT 14 module for Daggerheart 2.9.2+. Version 0.18.0-draft.5 previews a wider HUD with centered and left-side layouts plus native chat clearance. This is a draft: keep the stable 0.17.0 archive for rollback. The interface includes complete English and Russian localization, including automatic detection of active Russian Daggerheart translation modules and a manual per-player language override.
+
+Install from Foundry's **Add-on Modules → Install Module → Manifest URL** using `https://raw.githubusercontent.com/nikitagermanovicius100-hub/daggerpanelll/main/daggerheart-quick-panel/module.json`.
 
 - The magnifier beside the portrait opens smaller / reset / larger controls (75–125%, 5% steps). 100% preserves the original layout. This client-local preference is available to players and GMs, persists across reloads and does not change anyone else's HUD. Adjustments do not rerender the HUD or update actor documents.
 - The same magnifier menu switches between Centered HUD and Side HUD. Centered is the default; Side anchors the portrait and ribbons to the lower-left safe margin. Placement is client-local, persists across reloads and changes without rebuilding the HUD.
